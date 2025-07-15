@@ -231,13 +231,13 @@ def serial_monitor(alarm_table, jwt_token, base_url):
                 payload, flag = parts
                 if flag != '1':
                     continue
-                if len(payload) < 8:
+                if len(payload) < 4:
                     continue
-                device_id = payload[:8].upper()
-                print(f"[Serial Debug] Parsed device_id: {device_id}")
-                for cid, node_id in ALARM_NODE_MAP.items():
-                    if device_id.endswith(node_id):
-                        print(f"Alarm node trigger for Contact ID {cid} (device_id: {device_id})")
+                node_id = payload[-4:].upper()
+                print(f"[Serial Debug] Extracted node_id: {node_id}")
+                for cid, expected_node_id in ALARM_NODE_MAP.items():
+                    if node_id == expected_node_id:
+                        print(f"Alarm node trigger for Contact ID {cid} (node_id: {node_id})")
                         handle_alarm(cid, alarm_table, jwt_token, base_url)
             except Exception as e:
                 print(f"Serial parse error: {e} | Raw: {line!r}")
