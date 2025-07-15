@@ -224,18 +224,20 @@ def serial_monitor(alarm_table, jwt_token, base_url):
                 continue
             try:
                 text = line.decode('ascii', errors='ignore').strip().rstrip('\r\n')
+                print(f"[Serial Debug] Raw line: {text}")
                 parts = text.split(',')
                 if len(parts) != 2:
                     continue
                 payload, flag = parts
                 if flag != '1':
                     continue
-                if len(payload) < 9:
+                if len(payload) < 8:
                     continue
-                device_id = payload[:8]
+                device_id = payload[:8].upper()
+                print(f"[Serial Debug] Parsed device_id: {device_id}")
                 for cid, node_id in ALARM_NODE_MAP.items():
-                    if node_id in device_id:
-                        print(f"Alarm node trigger for Contact ID {cid}")
+                    if device_id.endswith(node_id):
+                        print(f"Alarm node trigger for Contact ID {cid} (device_id: {device_id})")
                         handle_alarm(cid, alarm_table, jwt_token, base_url)
             except Exception as e:
                 print(f"Serial parse error: {e} | Raw: {line!r}")
